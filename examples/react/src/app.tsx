@@ -14,7 +14,7 @@ const App = () => {
 };
 
 const root = ReactDOM.createRoot(
-  globalThis.document.querySelector("#root")!,
+  (globalThis as any).document.querySelector("#root")!,
 );
 root.render(
   <App />,

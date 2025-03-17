@@ -57,3 +57,14 @@ export const REACT_STATIC_TS_CONFIG_DEV = {
     "react-dom": "https://esm.sh/v119/react-dom@18.2.0?dev",
   },
 };
+
+export function omitKeys<T, TKey extends keyof T>(
+  obj: T,
+  keys: TKey[]
+): Omit<T, TKey> {
+  const result = { ...obj };
+  for (const key of keys) {
+    delete result[key];
+  }
+  return result;
+}

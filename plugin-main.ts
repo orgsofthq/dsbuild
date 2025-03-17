@@ -10,7 +10,7 @@ import {
   resolve,
 } from "./deps.ts";
 import { serve, setServeDir } from "./serve.ts";
-import { DEFAULT_SERVE_DIR, IS_DEV } from "./stuff.ts";
+import { DEFAULT_SERVE_DIR, IS_DEV, omitKeys } from "./stuff.ts";
 
 /**
  * Options for configuring the build process
@@ -72,6 +72,9 @@ export type BuildOptions = {
 
   /** Port number to serve on */
   port?: number;
+
+  /** Path to esbuild config file (e.g. esbuild.config.json) */
+  esbuildConfig?: string;
 };
 
 let isFirstBuild = true;
@@ -100,6 +103,7 @@ export const build = async (options: BuildOptions): Promise<void> => {
     sourcemap,
     launchBrowser,
     port,
+    esbuildConfig: esbuildConfig_,
   } = options;
 
   // Generate directories recursively if they don't exist
@@ -113,6 +117,16 @@ export const build = async (options: BuildOptions): Promise<void> => {
       ? parseJsonc(await Deno.readTextFile(configPath))
       : JSON.parse(await Deno.readTextFile(configPath))
     : undefined;
+
+  let esbuildConfig = esbuildConfig_
+    ? esbuildConfig_.endsWith(".jsonc")
+      ? parseJsonc(await Deno.readTextFile(esbuildConfig_))
+      : JSON.parse(await Deno.readTextFile(esbuildConfig_))
+    : undefined;
+
+  if (esbuildConfig) {
+    esbuildConfig = omitKeys(esbuildConfig, ["plugins"]);
+  }
 
   const opts: esbuild.BuildOptions = {
     plugins: [
@@ -151,6 +165,7 @@ export const build = async (options: BuildOptions): Promise<void> => {
     banner: IS_DEV
       ? { js: "globalThis.window.DENO_ENV = 'development';\n" }
       : undefined,
+    ...esbuildConfig,
   };
 
   const context = await esbuild.context(opts);

@@ -113,6 +113,7 @@ Example usage:
   const isReactStatic = args["react-static"];
   const isCss = args["css"];
   const external = args["external"] ? args["external"].split(",") : [];
+  const esbuildConfig = args["esbuild-config"];
 
   // Replace relative with absolute paths
   const cwd = Deno.cwd();
@@ -289,6 +290,7 @@ Example usage:
     sourcemap,
     launchBrowser,
     port,
+    esbuildConfig,
   });
 
   Deno.exit(0);

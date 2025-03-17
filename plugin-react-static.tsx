@@ -19,7 +19,7 @@ export const buildReactStatic = async (options: {
   const doBuild = async () => {
     if (inFile.endsWith(".tsx")) {
       const startTime = performance.now();
-      const output = await compileReactStatic(inFile, options.watch);
+      const output = await compileReactStaticNew(inFile, options.watch);
 
       if (outFile) {
         await Deno.writeTextFile(outFile, output);
@@ -109,6 +109,8 @@ export const compileReactStatic = async (
 
   // eval the JS, then run through compileReactStatic
   const App = await import(filePath).then((m) => m.default)
+
+  // @ts-ignore Deno can't find jsx-dev-runtime
   const compiled = renderToStaticMarkup(<App />)
   return '<!DOCTYPE html>' + compiled
 };
