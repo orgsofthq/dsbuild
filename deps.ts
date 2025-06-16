@@ -1,9 +1,9 @@
 import * as esbuild from "npm:esbuild@^0.23.0"
 import { compile as compileMdx_ } from "npm:@mdx-js/mdx@3.0.0"
-import { renderToStaticMarkup } from "npm:react-dom@^18.2.0/server"
-import remarkGfm from 'npm:remark-gfm@^1.0.0'
-import { denoLoaderPlugin, denoResolverPlugin } from "jsr:@luca/esbuild-deno-loader@^0.11.1";
-import React from "npm:react@^18.2.0";
+import { renderToStaticMarkup } from "npm:react-dom@^18.3.0/server"
+import remarkGfm from 'npm:remark-gfm@^4'
+import { denoPlugin } from "jsr:@deno/esbuild-plugin@^1";
+import React from "npm:react@^18.3.0";
 import {parseArgs} from "jsr:@std/cli@^0.224.7/parse-args";
 import { isAbsolute, join, resolve, normalize, dirname, extname, parse } from 'jsr:@std/path@^0.225.2'
 import { ensureDir } from 'jsr:@std/fs@^1'
@@ -24,9 +24,8 @@ export {
   // mdx-js
   compileMdx,
 
-  // esbuild_deno_loader
-  denoLoaderPlugin,
-  denoResolverPlugin,
+  // @deno/esbuild-plugin
+  denoPlugin,
 
   // deno std
   parseArgs,

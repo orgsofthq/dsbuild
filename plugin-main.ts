@@ -1,8 +1,8 @@
+import { exists } from "jsr:@std/fs@^1";
 import { dirname, esbuild, parseJsonc } from "./deps.ts";
 
 import {
-  denoLoaderPlugin,
-  denoResolverPlugin,
+  denoPlugin,
   extname,
   join,
   normalize,
@@ -112,12 +112,6 @@ export const build = async (options: BuildOptions): Promise<void> => {
 
   const split = inFiles?.length ? true : false;
 
-  const config = configPath
-    ? configPath.endsWith(".jsonc")
-      ? parseJsonc(await Deno.readTextFile(configPath))
-      : JSON.parse(await Deno.readTextFile(configPath))
-    : undefined;
-
   let esbuildConfig = esbuildConfig_
     ? esbuildConfig_.endsWith(".jsonc")
       ? parseJsonc(await Deno.readTextFile(esbuildConfig_))
@@ -128,23 +122,24 @@ export const build = async (options: BuildOptions): Promise<void> => {
     esbuildConfig = omitKeys(esbuildConfig, ["plugins"]);
   }
 
+  let finalConfigPath: string | undefined = configPath;
+  if (!finalConfigPath && !importMap) {
+    // try to automatically find a deno.jsonc or deno.json file
+    const denoJson = await exists(join(Deno.cwd(), "deno.json"));
+    if (denoJson) {
+      finalConfigPath = "deno.json";
+    } else {
+      const denoJsonc = await exists(join(Deno.cwd(), "deno.jsonc"));
+      if (denoJsonc) {
+        finalConfigPath = "deno.jsonc";
+      }
+    }
+  }
+
   const opts: esbuild.BuildOptions = {
     plugins: [
-      denoResolverPlugin(
-        importMap
-          ? {
-            importMapURL: importMap,
-            // configPath: configPath,
-          }
-          : {},
-      ),
-      ...plugins,
-      denoLoaderPlugin({
-        importMapURL: importMap,
-        nodeModulesDir: config?.nodeModulesDir
-          ? config?.nodeModulesDir
-          : "auto",
-        loader: config?.nodeModulesDir === "auto" ? "portable" : "native",
+      denoPlugin({
+        configPath: importMap ?? finalConfigPath ?? undefined,
       }),
     ],
     entryPoints: split ? inFiles : [inFile],
@@ -232,11 +227,27 @@ export const build = async (options: BuildOptions): Promise<void> => {
     worker.postMessage({ serveDir, launchBrowser, port });
   };
 
+  let exited = false;
+  const exit = async () => {
+    if (exited) return;
+    exited = true;
+    try {
+      esbuild.stop();
+    } catch (e) {
+      console.warn("Error stopping esbuild: ", e);
+    }
+  };
+
   if (!watch && !shouldServe) {
     // DEFAULT: Build once
     await rebuild();
-    esbuild.stop();
+    await exit();
   }
+
+  Deno.addSignalListener("SIGINT", async () => {
+    await exit();
+    Deno.exit(0);
+  });
 
   if (shouldServe === "only" || (shouldServe && !watch)) {
     // SERVE-ONLY: Now, serve indefinitely
@@ -303,5 +314,5 @@ export const build = async (options: BuildOptions): Promise<void> => {
     debounceRebuild();
   }
 
-  esbuild.stop();
+  await exit();
 };

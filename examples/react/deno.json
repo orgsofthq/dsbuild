@@ -1,12 +1,16 @@
 {
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "dom.asynciterable", "esnext", "deno.ns"],
+    "jsx": "react-jsxdev",
+    "jsxImportSource": "react"
+  },
   "tasks": {
-    "build": "dsbuild --in=src/app.tsx",
-    "run": "dsbuild --in=src/app.tsx --live --serve"
+    "build": "DENO_ENV=development dsbuild --in=src/app.tsx",
+    "run": "DENO_ENV=development dsbuild --in=src/app.tsx --live --serve"
   },
   "imports": {
-    "react": "https://esm.sh/v119/react@18.2.0?dev",
-    "react-dom/client": "https://esm.sh/v119/react-dom@18.2.0/client?dev",
-    "react/": "https://esm.sh/v119/react@18.2.0/",
-    "react-dom": "https://esm.sh/v119/react-dom@18.2.0?dev"
+    "react": "npm:react@^18.3.0",
+    "react-dom/client": "npm:react-dom@^18.3.0/client",
+    "react-dom": "npm:react-dom@^18.3.0"
   }
 }

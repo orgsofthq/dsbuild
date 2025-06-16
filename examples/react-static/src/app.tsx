@@ -1,6 +1,6 @@
-// Note: You **must** import React for static rendering to work.
-// Also, you **must** use `export default` for your component.
-import React from "https://esm.sh/react@18.2.0";
+// Note: You **must** use `export default` for your component.
+// You should also import React here for types.
+import React from "npm:react@^18.3.0";
 
 const App = () => {
   return (

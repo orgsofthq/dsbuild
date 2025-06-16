@@ -1,4 +1,4 @@
-import { marked } from "https://esm.sh/marked@6.0.0";
+import { marked } from "npm:marked@^6.0.0";
 
 window.onload = () => {
   const str = `# 🪐 sup, universe!

@@ -19,7 +19,7 @@ export const buildReactStatic = async (options: {
   const doBuild = async () => {
     if (inFile.endsWith(".tsx")) {
       const startTime = performance.now();
-      const output = await compileReactStaticNew(inFile, options.watch);
+      const output = await compileReactStatic(inFile, options.watch);
 
       if (outFile) {
         await Deno.writeTextFile(outFile, output);

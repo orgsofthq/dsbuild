@@ -131,28 +131,8 @@ Example usage:
     outFile = DEFAULT_OUT_FILE;
   }
 
-  // Set up default import map
   if (importMap === "null" || importMap === "false") {
     importMap = null;
-  } else {
-    if (importMap && !isAbsolute(importMap)) {
-      importMap = join("file://", cwd, importMap);
-    }
-    if (!importMap) {
-      const importMaps = ["import-map.json", "deno.json"]; // NOTE: .jsonc doesn't work yet
-      for (const map of importMaps) {
-        const potentialImportMap = join(cwd, map).replace("file:", "");
-        try {
-          const stat = await Deno.stat(potentialImportMap);
-          if (stat.isFile) {
-            importMap = join("file://", potentialImportMap);
-            break;
-          }
-        } catch (_e) {
-          // ignore
-        }
-      }
-    }
   }
 
   if (!isAbsolute(serveDir)) {

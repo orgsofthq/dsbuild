@@ -36,12 +36,14 @@ export const REACT_STATIC_TS_CONFIG = {
     jsx: "react-jsxdev",
     jsxImportSource: "react",
   },
-  imports: {
-    react: "https://esm.sh/v119/react@18.2.0",
-    "react-dom/client": "https://esm.sh/v119/react-dom@18.2.0/client",
-    "react/": "https://esm.sh/v119/react@18.2.0/",
-    "react-dom": "https://esm.sh/v119/react-dom@18.2.0",
-  },
+  "imports": {
+    "react": "npm:react@^18.3.0",
+    "react-dom/client": "npm:react-dom@^18.3.0/client",
+    "react/": "npm:react@^18.3.0/",
+    "react-dom": "npm:react-dom@^18.3.0",
+    "react/jsx-runtime": "npm:react@^18.3.0/jsx-runtime",
+    "react/jsx-dev-runtime": "npm:react@^18.3.0/jsx-dev-runtime"
+  }
 };
 
 export const REACT_STATIC_TS_CONFIG_DEV = {
@@ -50,12 +52,14 @@ export const REACT_STATIC_TS_CONFIG_DEV = {
     jsx: "react-jsxdev",
     jsxImportSource: "react",
   },
-  imports: {
-    react: "https://esm.sh/v119/react@18.2.0?dev",
-    "react-dom/client": "https://esm.sh/v119/react-dom@18.2.0/client?dev",
-    "react/": "https://esm.sh/v119/react@18.2.0/",
-    "react-dom": "https://esm.sh/v119/react-dom@18.2.0?dev",
-  },
+  "imports": {
+    "react": "npm:react@^18.3.0",
+    "react-dom/client": "npm:react-dom@^18.3.0/client",
+    "react/": "npm:react@^18.3.0/",
+    "react-dom": "npm:react-dom@^18.3.0",
+    "react/jsx-runtime": "npm:react@^18.3.0/jsx-runtime",
+    "react/jsx-dev-runtime": "npm:react@^18.3.0/jsx-dev-runtime"
+  }
 };
 
 export function omitKeys<T, TKey extends keyof T>(

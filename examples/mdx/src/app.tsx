@@ -1,3 +1,4 @@
+// IMPORTANT: React MUST be imported as React here to work with MDX.
 import React from "react";
 import ReactDOM from "react-dom/client";
 import MyExample from "./MyExample.jsx";
