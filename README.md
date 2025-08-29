@@ -1,36 +1,30 @@
-<p align="center"><a href="https://github.com/mattvr/dsbuild">
+<p align="center"><a href="https://github.com/orgsofthq/dsbuild">
 <img src="/dsbuild.svg" ></a></p>
-<p align="center"><strong>Run Deno code in the browser. Fast & simple.</strong></p>
+<p align="center"><strong>Run your Deno code in the browser.</strong></p>
 <h4 align="center"><strong><a href="https://orgsoft.org/discord"><img src="https://github.com/mattvr/ShellGPT/assets/4052466/9ba871c8-451c-4178-9035-645142b617d9" /> Discord </a></strong></h4>
 
 ---
 
-`dsbuild` is a simple, fast static site builder.
+`dsbuild` helps you create modern websites with Deno TypeScript.
 
-It compiles any [Deno](https://deno.land/) TypeScript (or Markdown) into a
-single JavaScript file that can be run in the browser.
+With one-command & zero configuration, `dsbuild` bundles your code into a single JavaScript file that can be run in the browser.
 
-It's a one-command, zero-configuration way to build React, Markdown, or other
-JS-powered web sites entirely using Deno.
+Use it to build React, Markdown, or other JS-powered web sites entirely using Deno with hot-reloading & a local development server. *No frameworks, bloat, or platform lock-in necessary.*
 
-**Features:**
+## ⬡ Features
 
-- Supports TypeScript, MDX (Markdown), JSX, and React out of the box.
-- Automatic rebuilds as you develop (`dsbuild --watch`)
-- Previewing via a simple included web server (`dsbuild --serve`)
-- URL imports using `https://`, `file://`, `npm:`, `jsr:`, and import maps.
-- Full support for Deno syntax and modules that don't require the `Deno`
-  namespace or system APIs.
-- Powered by [`esbuild`](https://esbuild.github.io/) and
-  [`esbuild_deno_loader`](https://github.com/lucacasonato/esbuild_deno_loader)
-  under the hood.
+- **Zero configuration** - Just run `dsbuild`
+- **TypeScript & JSX** - Full support out of the box 
+- **React & MDX** - Build modern web apps and content sites
+- **CSS bundling** - Combines and minifies styles
+- **Hot reload** - Instant updates with `--watch`
+- **Dev server** - Built-in server with `--serve`
+- **Import maps** - Support for all Deno import types (`npm:`, `jsr:`, `https://`)  
+- **Instant builds** - Powered by [`esbuild`](https://esbuild.github.io/) and [`@deno/esbuild-plugin`](https://github.com/denoland/deno-esbuild-plugin)
 
-<br /><br />
+## ⬡ Installation
 
-## Installation
-
-1. Install the
-   [Deno runtime](https://deno.land/manual/getting_started/installation).
+1. Install the [Deno runtime](https://deno.land/manual/getting_started/installation).
 
 2. Run the following command to install dsbuild:
 
@@ -40,90 +34,290 @@ deno install -frAg jsr:@orgsoft/dsbuild
 
 3. Ensure `$HOME/.deno/bin` is in your `PATH` environment variable.
 
-<br /><br />
+## ⬡ Usage
 
-## Usage
+### Basic
 
-See [examples/](examples/) for full examples of building React, Markdown, or
-other JS-powered web sites.
+```bash
+# Builds src/app.ts into public/app.js
+dsbuild
 
-- ### `dsbuild`
+# Watch for changes and rebuild automatically
+dsbuild --watch
+# or
+dsbuild -w
 
-  - Run this command from any directory to compile `src/app.ts` into
-    `public/app.js`.
+# Watch specific directories
+dsbuild --watch=src/ui,src/api
 
-- ### `dsbuild --watch` (or `dsbuild -w`)
+# Watch and serve on localhost:8000
+dsbuild --watch --serve
+# or
+dsbuild -ws
 
-  - Watches `src/` directory and rebuilds on changes.
+# Serve without building
+dsbuild --serve-only
 
-- ### `dsbuild --watch=src/ui,src/api`
+# Build a static site
+dsbuild --react-static --in=src/site.tsx --out=public/index.html
+
+# Compile MDX files into JSX
+dsbuild --mdx src/MyExample.mdx
+
+# Combine & minify CSS files
+dsbuild --css --in=src/css/ --out=public/main.css
+```
+
+### Configuration
+
+```bash
+# Use a config or import map (will auto-discover)
+dsbuild --config deno.jsonc
+dsbuild --import-map import-map.json
+
+# Custom input/output files
+dsbuild --in src/some-file.ts --out public/another-file.js
+
+# Target specific browsers
+dsbuild --target chrome99,firefox99,safari15
+
+# Development build (no minification)
+DENO_ENV=development dsbuild
+
+# Generate deno.json with browser/React settings
+dsbuild --denoconfig
+dsbuild --denoconfig --out deno.json
+
+# Generate tsconfig.json with browser/React settings  
+dsbuild --tsconfig
+dsbuild --tsconfig --out tsconfig.json
+
+# Provide a custom esbuild configuration
+dsbuild --esbuild-config esbuild-config.json
+```
+
+## ⬡ Examples
+
+### ⬢ Basic TypeScript
+
+Build a simple web app that renders Markdown:
+
+```typescript
+// src/app.ts
+import { marked } from "npm:marked@^9.1.2";
+
+const markdown = `
+# Hello World
+This is **markdown** rendered with dsbuild!
+`;
+
+document.body.innerHTML = marked(markdown);
+```
+
+```bash
+dsbuild --watch --serve
+# Visit http://localhost:8000
+```
+
+**[View full example →](examples/basic/)**
+
+---
+
+### ⬢ CSS compilation
+
+Combine multiple CSS files into a single bundle:
+
+```css
+/* src/base.css */
+body {
+  --color: green;
+  background-color: var(--color);
+}
+
+/* src/component.css */ 
+.component {
+  padding: 1rem;
+  border-radius: 8px;
+}
+```
+
+```bash
+# Concatenates CSS files alphabetically
+dsbuild --css
+```
+
+**File structure:**
+```
+src/
+  ├── base.css
+  ├── component.css
+  └── component.mobile.css
+public/
+  └── app.css  # Generated bundle
+```
+
+**[View full example →](examples/css/)**
+
+---
+
+### ⬢ React
+
+Build interactive React apps with Deno:
+
+```typescript
+// src/app.tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+const App = () => {
+  const [count, setCount] = React.useState(0);
   
-  - Watches `src/ui` and `src/api` and rebuilds on changes.
+  return (
+    <div>
+      <h1>🪐 sup, universe!</h1>
+      <p>Count: {count}</p>
+      <button onClick={() => setCount(count + 1)}>
+        Increment
+      </button>
+    </div>
+  );
+};
 
-- ### `dsbuild --watch --serve` (or `dsbuild -ws`)
+const root = ReactDOM.createRoot(
+  document.querySelector("#root")!
+);
+root.render(<App />);
+```
 
-  - Watch and serve `public/` on `localhost:8000`.
+```bash
+dsbuild --watch --serve
+# Visit http://localhost:8000
+```
 
-- ### `dsbuild --import-map import-map.json`
+**[View full example →](examples/react/)**
 
-  - Builds with import map.
+---
 
-- ### `dsbuild --denoconfig`
+### ⬢ Static site generation (SSG)
 
-  - Generates a deno.json you can use for Deno development with proper `target`
-    and `lib` settings for Browsers/React/JSX.
+Generate static HTML with React (no client-side JavaScript):
 
-  - You can also run `dsbuild --denoconfig --out deno.json` to write to a
-    file.
+```typescript
+// src/app.tsx
+import React from "npm:react@^18.3.0";
 
-- ### `dsbuild --tsconfig`
+const App = () => {
+  return (
+    <html lang="en">
+      <body style={{
+        fontFamily: "sans-serif",
+        textAlign: "center",
+        background: "linear-gradient(180deg, #000 0%, #1D1D1D 100%)",
+        color: "#fff"
+      }}>
+        <h1>🪐 sup, universe!</h1>
+        <p>This page was statically generated!</p>
+      </body>
+    </html>
+  );
+};
 
-  - Generates a tsconfig.json you can use for Deno development with proper
-    `target` and `lib` settings for Browsers/React/JSX.
+export default App;
+```
 
-  - You can also run `dsbuild --tsconfig --out tsconfig.json` to write to a
-    file.
+```bash
+dsbuild --watch --serve
+# Generates static HTML in public/
+```
 
-- ### `dsbuild --in src/some-file.ts --out public/another-file.js`
+**[View full example →](examples/react-static/)**
 
-  - You can configure the `in` and `out` flags to customize the input and output
-    files.
-    
-  - These example values are the same as the defaults when you call `dsbuild`.
+---
 
-- ### `dsbuild --target chrome99,firefox99,safari15`
+### ⬢ MDX (Markdown + JSX)
 
-  - Customize the output target, to specify browsers or a different environment.
-    ([esbuild target docs](https://esbuild.github.io/api/#target))
+Combine Markdown content with React components:
 
-- ### `dsbuild --serve-only`
+```jsx
+// src/MyExample.mdx
+import Typewriter from 'npm:typewriter-effect';
 
-  - Serve `public/` on `localhost:8000` without building.
+# 🪐 sup universe from MDX
 
-- ### `DENO_ENV=development dsbuild`
+<Typewriter
+  options={{
+    strings: ['This page was rendered with **dsbuild**!'],
+    autoStart: true,
+    loop: true,
+    delay: 33,
+  }}
+/>
+```
 
-  - Builds without minification.
+```typescript
+// src/app.tsx  
+import React from "react";
+import ReactDOM from "react-dom/client";
+import MyExample from "./MyExample.jsx"; // Compiled from .mdx
 
-<br /><br />
+const App = () => <MyExample />;
 
-## Quick Start
+ReactDOM.createRoot(document.querySelector("#root")!)
+  .render(<App />);
+```
 
-Check out the `examples/` folder for a demo, after `git clone`-ing this repo and
-installing `dsbuild`.
+**[View full example →](examples/mdx/)**
 
-Inside the folder, run `dsbuild --serve --watch`, make changes to `src/app.ts`,
-and you should see the page immediately update.
+---
 
-<br /><br />
+### ⬢ All examples
 
-## Contributions & local development
+| Example | Description | Features |
+|---------|-------------|----------|
+| **[Basic](examples/basic/)** | Simple TypeScript app | Markdown rendering, npm imports |
+| **[CSS](examples/css/)** | CSS file combination | Multiple CSS files, concatenation |
+| **[React](examples/react/)** | Interactive React app | Client-side rendering, state management |
+| **[React Static](examples/react-static/)** | Static site generation | Server-side rendering, static HTML |
+| **[MDX](examples/mdx/)** | Markdown + JSX | React components in Markdown |
+| **[Node](examples/node/)** | Server-side example | Node.js compatibility |
 
-You can clone this repository to make changes. 
+## ⬡ Quick Start
 
-Once you have a local copy, run `deno task install:dev` from this directory to replace your `dsbuild` installation with a local development copy.
+Get up and running in 30 seconds:
 
-Contributions are welcome.
+```bash
+# 1. Create a new project
+mkdir my-app && cd my-app
 
-## License
+# 2. Create src/app.ts
+mkdir src
+echo 'document.body.innerHTML = "<h1>🪐 Hello dsbuild!</h1>";' > src/app.ts
+
+# 3. Build and serve
+dsbuild --watch --serve
+# Visit http://localhost:8000
+```
+
+Or explore the **[examples](examples/)** directory:
+
+```bash
+git clone https://github.com/orgsofthq/dsbuild.git
+cd dsbuild/examples/react  # or basic, css, mdx, etc.
+dsbuild --watch --serve
+```
+
+## ⬡ Contributions & local development
+
+Contributions welcome. To set up local development:
+
+```bash
+git clone https://github.com/orgsofthq/dsbuild.git
+cd dsbuild
+deno task install:dev
+```
+
+This replaces your global `dsbuild` installation with a local development copy.
+
+## ⬡ License
 
 MIT license.

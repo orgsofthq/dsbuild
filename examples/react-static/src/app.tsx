@@ -22,7 +22,7 @@ const App = () => {
       }}>
         <div>
           <h1>🪐 sup, universe!</h1>
-          <p>This page was rendered with React & esbuild.</p>
+          <p>This page was rendered with React & dsbuild.</p>
         </div>
       </body>
       </html>

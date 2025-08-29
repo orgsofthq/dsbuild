@@ -39,10 +39,7 @@ export const REACT_STATIC_TS_CONFIG = {
   "imports": {
     "react": "npm:react@^18.3.0",
     "react-dom/client": "npm:react-dom@^18.3.0/client",
-    "react/": "npm:react@^18.3.0/",
     "react-dom": "npm:react-dom@^18.3.0",
-    "react/jsx-runtime": "npm:react@^18.3.0/jsx-runtime",
-    "react/jsx-dev-runtime": "npm:react@^18.3.0/jsx-dev-runtime"
   }
 };
 
@@ -55,10 +52,7 @@ export const REACT_STATIC_TS_CONFIG_DEV = {
   "imports": {
     "react": "npm:react@^18.3.0",
     "react-dom/client": "npm:react-dom@^18.3.0/client",
-    "react/": "npm:react@^18.3.0/",
     "react-dom": "npm:react-dom@^18.3.0",
-    "react/jsx-runtime": "npm:react@^18.3.0/jsx-runtime",
-    "react/jsx-dev-runtime": "npm:react@^18.3.0/jsx-dev-runtime"
   }
 };
 
