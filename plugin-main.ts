@@ -1,5 +1,5 @@
 import { exists } from "jsr:@std/fs@^1";
-import { dirname, esbuild, parseJsonc } from "./deps.ts";
+import { dirname, esbuild, isAbsolute, parseJsonc } from "./deps.ts";
 
 import {
   denoPlugin,
@@ -10,7 +10,14 @@ import {
   resolve,
 } from "./deps.ts";
 import { serve, setServeDir } from "./serve.ts";
-import { DEFAULT_SERVE_DIR, IS_DEV, omitKeys } from "./stuff.ts";
+import {
+  DEFAULT_SERVE_DIR,
+  DenoTempFile,
+  IS_DEV,
+  omitKeys,
+  REACT_STATIC_TS_CONFIG,
+  REACT_STATIC_TS_CONFIG_DEV,
+} from "./stuff.ts";
 
 /**
  * Options for configuring the build process
@@ -80,6 +87,71 @@ export type BuildOptions = {
 let isFirstBuild = true;
 
 /**
+ * Configuration resource for managing TypeScript/JSX config conformance
+ */
+type ConformedConfig = {
+  readonly path: string | undefined;
+  [Symbol.dispose](): void;
+};
+
+/**
+ * Creates a conformed config with automatic resource cleanup
+ * @param options - Config options
+ * @returns Resource-managed config object
+ */
+async function withConformedConfig({
+  configPath,
+  inFiles,
+  isDev
+}: {
+  configPath?: string;
+  inFiles?: string[];
+  isDev: boolean;
+}): Promise<ConformedConfig> {
+  // Check if input files contain JSX/TSX
+  const isJsx = inFiles?.find((file) =>
+    file.endsWith(".jsx") || file.endsWith(".tsx")
+  );
+
+  const finalConfig = configPath
+    ? parseJsonc(await Deno.readTextFile(configPath)) as Record<string, any>
+    : isJsx
+    ? isDev ? REACT_STATIC_TS_CONFIG_DEV : REACT_STATIC_TS_CONFIG
+    : undefined;
+
+  // Adjust JSX compiler options based on dev mode
+  if (finalConfig && "compilerOptions" in finalConfig) {
+    if (!isDev && finalConfig["compilerOptions"]?.["jsx"] === "react-jsxdev") {
+      finalConfig["compilerOptions"]["jsx"] = "react-jsx";
+    }
+    if (isDev && finalConfig["compilerOptions"]?.["jsx"] === "react-jsx") {
+      finalConfig["compilerOptions"]["jsx"] = "react-jsxdev";
+    }
+  }
+
+  if (finalConfig && configPath && "importMap" in finalConfig) {
+    // Convert to absolute path if not already
+    if (finalConfig["importMap"] && !isAbsolute(finalConfig["importMap"])) {
+      finalConfig["importMap"] = resolve(dirname(configPath), finalConfig["importMap"] as string);
+    }
+  }
+
+  
+  const tmpFile = finalConfig
+    ? new DenoTempFile(JSON.stringify(finalConfig))
+    : undefined;
+
+  const finalConfigPath = tmpFile ? tmpFile.getPath() : configPath;
+
+  return {
+    path: finalConfigPath,
+    [Symbol.dispose]() {
+      tmpFile?.[Symbol.dispose]();
+    }
+  };
+}
+
+/**
  * Builds a project using esbuild
  * @param options - Build options
  */
@@ -135,6 +207,15 @@ export const build = async (options: BuildOptions): Promise<void> => {
       }
     }
   }
+
+  // Conform config json to match needed JSX config
+  using config = await withConformedConfig({
+    configPath: finalConfigPath,
+    inFiles: inFiles,
+    isDev: IS_DEV
+  });
+
+  finalConfigPath = config.path;
 
   const opts: esbuild.BuildOptions = {
     plugins: [

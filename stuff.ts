@@ -66,3 +66,28 @@ export function omitKeys<T, TKey extends keyof T>(
   }
   return result;
 }
+
+/**
+* A temporary file that is automatically deleted when the object is disposed.
+*/
+export class DenoTempFile {
+  private path: string;
+  private disposed = false;
+
+  [Symbol.dispose]() {
+      if (this.disposed) {
+          return;
+      }
+      this.disposed = true;
+      return Deno.remove(this.path);
+  }
+
+  constructor(text: string) {
+      this.path = Deno.makeTempFileSync();
+      Deno.writeTextFileSync(this.path, text);
+  }
+
+  getPath() {
+      return this.path;
+  }
+}
